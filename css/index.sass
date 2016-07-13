@@ -1,0 +1,71 @@
+html, body
+    margin: 0
+    padding: 0
+    background: #eaeaea
+
+.scene
+    position: absolute
+    top: 0
+    right: 0
+    left: 0
+    bottom: 0
+    z-index: 0
+
+.edges
+    width: 100%
+    height: 100%
+
+.menu
+    position: fixed
+    top: 0
+    left: 0
+    right: 0
+    z-index: 1
+    list-style-type: none
+    margin: 0
+    padding: 0
+    li
+        padding: 1em
+        cursor: pointer
+        display: inline-block
+        &:hover
+            background: yellow
+
+.edge
+    cursor: pointer
+    stroke-width: 3
+    stroke: url(#linear)
+
+.module-basic
+    cursor: pointer
+    position: relative
+    background: #fff868
+    border-radius: 6px
+    border: 3px solid #1B2CED
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.4)
+    padding: 6px 8px 8px 8px
+
+    .inputs,
+    .outputs
+        height: 3px
+        margin-left: 8px
+        position: relative
+    .inputs
+        top: -10px
+    .outputs
+        top: 10px
+
+    .input,
+    .output
+        width: 20px
+        height: 5px
+        display: inline-block
+        vertical-align: top
+        cursor: crosshair
+        margin-right: 10px
+    .input
+        background: #ff7676
+    .output
+        background: #00FF7C
+
+
