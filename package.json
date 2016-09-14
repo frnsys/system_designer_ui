@@ -1,20 +1,21 @@
 {
-  "name": "system_designer",
+  "name": "system_designer_ui",
   "version": "0.0.0",
-  "homepage": "https://github.com/frnsys/system_designer",
+  "homepage": "https://github.com/frnsys/system_designer_ui",
   "license": "MIT",
   "description": "graphical programming UI for system dynamics/agent-based modeling",
   "repository": {
     "type": "git",
-    "url": "http://github.com/frnsys/system_designer"
+    "url": "http://github.com/frnsys/system_designer_ui"
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack --progress --colors --watch",
+    "start": "webpack-dev-server --colors ---progress --port 8081",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "react": "^0.14.5",
+    "react-canvas": "^1.2.0",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^0.14.5"
@@ -29,6 +30,7 @@
     "node-sass": "^3.8.0",
     "sass-loader": "^4.0.0",
     "style-loader": "^0.13.1",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.15.2"
   }
 }
