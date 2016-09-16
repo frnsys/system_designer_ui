@@ -1,25 +1,20 @@
 import React from 'react';
 
-const outputXPadding = 30;
-const outputXLeftMargin = 28;
-const inputXPadding = 30;
-const inputXLeftMargin = 28;
-const moduleHeight = 20; // TODO this should not be hardcoded
+const yOffset = 10;
+const xOffset = 5;
 
 class Edge extends React.Component {
   render() {
-    var fromModPos = this.props.project.positions[this.props.edge.from.id],
-      toModPos  = this.props.project.positions[this.props.edge.to.id],
-      tailPos = {
-        x: fromModPos.x + outputXLeftMargin +
-          this.props.edge.output * outputXPadding,
-        y: fromModPos.y + moduleHeight
-      },
-      headPos = {
-        x: toModPos.x + inputXLeftMargin +
-          this.props.edge.input * inputXPadding,
-        y: toModPos.y
-      };
+    let inputPos = this.props.scene.modules[this.props.edge.to.id].inputPositions[this.props.edge.input];
+    let outputPos = this.props.scene.modules[this.props.edge.from.id].outputPositions[this.props.edge.output];
+    let tailPos = {
+      x: outputPos.left + xOffset,
+      y: outputPos.top + yOffset
+    };
+    let headPos = {
+      x: inputPos.left + xOffset,
+      y: inputPos.top + yOffset
+    };
 
     return (
       <line className="edge"

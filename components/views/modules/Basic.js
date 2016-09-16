@@ -1,5 +1,11 @@
+import _ from 'underscore';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { DragSource } from 'react-dnd';
+import TextField from '../fields/Text';
+import { VictoryChart, VictoryAxis, VictoryLine } from 'victory';
+import { jStat } from 'jstat';
+import BaseVariable from '../Variable';
 
 const dragSource = {
   beginDrag(props) {
@@ -11,7 +17,7 @@ const dragSource = {
 
   endDrag(props) {
     props.scene.setState({
-      draggingModuleId:undefined
+      draggingModuleId: undefined
     });
   }
 };
@@ -23,10 +29,31 @@ function collect(connect, monitor) {
   };
 }
 
-class BasicModuleComponent extends React.Component {
+class BasicModule extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.state = {disableDrag: false};
+    this.state = {
+      disableDrag: false,
+      name: 'Basic Module',
+      vars: props.module.ins.reduce(function(m,inp) {
+        m[inp] = 0;
+        return m
+      }, {})
+    };
+    this.inputPositions = {};
+    this.outputPositions = {};
+  }
+
+  registerInputPosition(el) {
+    if (el !== null && !(el.props.inputNum in this.inputPositions)) {
+      this.inputPositions[el.props.inputNum] = _.clone(ReactDOM.findDOMNode(el.refs.input).getBoundingClientRect());
+    }
+  }
+
+  registerOutputPosition(i, el) {
+    if (el !== null && !(i in this.outputPositions)) {
+      this.outputPositions[i] = _.clone(ReactDOM.findDOMNode(el).getBoundingClientRect());
+    }
   }
 
   render() {
@@ -41,33 +68,78 @@ class BasicModuleComponent extends React.Component {
       left: pos.x,
       opacity: this.props.isDragging ? 0.5 : 1
     };
-    const element = <div className="module-basic"
+    const nameField = <TextField
+      value={this.state.name}
+      onFinish={this.serverCallback.bind(this)}
+      name="name"
+      className="module-name" />;
+
+    var outputs, name;
+    if (this.props.module.outs.length === 1) {
+      name = <div className="variable">{nameField}<span className="output" outputNum="0"
+              onMouseDown={this.onOutputMouseDown.bind(this, 0)}
+              onMouseEnter={() => this.setState({ disableDrag: true })}
+              onMouseLeave={() => this.setState({ disableDrag: false })}
+              ref={this.registerOutputPosition.bind(this, 0)}
+              key="0" /></div>;
+      outputs = '';
+    } else {
+      name = <div>{nameField}</div>;
+      outputs = this.props.module.outs.map((output, i) =>
+          <span className="output" outputNum={i}
+            onMouseDown={this.onOutputMouseDown.bind(this, i)}
+            onMouseEnter={() => this.setState({ disableDrag: true })}
+            onMouseLeave={() => this.setState({ disableDrag: false })}
+            key={i}
+            ref={this.registerOutputPosition.bind(this, i)}
+          />
+        , this);
+    }
+
+
+        // <VictoryChart domain={this.state.domain}>
+        //   <VictoryLine y={(data) => jStat.normal.pdf(data.x, this.state.vars.mean, this.state.vars.std)} />
+        // </VictoryChart>
+
+    const element = <div className="module module-basic"
         data-module-id={this.props.module.id}
         style={style}>
-        <div className="inputs">
+        <div className="outputs">
+            {outputs}
+        </div>
+        {name}
+        <ul className="variables">
           {
             this.props.module.ins.map((input, i) =>
-              <span className="input" data-input-index={i} key={i}></span>)
+              <BaseVariable name={input} inputNum={i} onChange={this.onVarChange.bind(this)} ref={this.registerInputPosition.bind(this)} key={i} />)
           }
-        </div>
-        <div className="outputs">
-          {
-            this.props.module.outs.map((output, i) =>
-              (<span className="output" data-output-index={i}
-                onMouseDown={this.onOutputMouseDown.bind(this, i)}
-                onMouseEnter={() => this.setState({ disableDrag: true })}
-                onMouseLeave={() => this.setState({ disableDrag: false })}
-                key={i}
-              />)
-            , this)
-          }
-        </div>
+        </ul>
       </div>;
     if (this.state.disableDrag) {
       return element;
     } else {
       return this.props.connectDragSource(element);
     }
+  }
+
+  onVarChange(val) {
+    console.log(val);
+  }
+
+  serverCallback(state) {
+    var newState = {vars:{}};
+    console.log('calling server (fake)')
+    console.log(state);
+    Object.keys(state).forEach(function(key) {
+      if (key.indexOf('vars') === 0) {
+        newState.vars[key.substring('vars'.length+1)] = state[key];
+      } else {
+        newState[key] = state[key];
+      }
+    });
+    newState.vars = _.extend({}, this.state.vars, newState.vars);
+    console.log(newState);
+    this.setState(newState);
   }
 
   onOutputMouseDown(outputNum, ev) {
@@ -81,7 +153,7 @@ class BasicModuleComponent extends React.Component {
 };
 
 
-BasicModuleComponent.propTypes = {
+BasicModule.propTypes = {
   project: React.PropTypes.object.isRequired,
   module: React.PropTypes.object.isRequired,
   scene: React.PropTypes.object.isRequired,
@@ -91,10 +163,10 @@ BasicModuleComponent.propTypes = {
   isDragging: React.PropTypes.bool.isRequired,
   connectDragSource: React.PropTypes.func.isRequired
 };
-BasicModuleComponent.defaultProps = {disableDrag: false};
+BasicModule.defaultProps = {disableDrag: false};
 
 export default DragSource(
   'module',
   dragSource,
   collect
-)(BasicModuleComponent);
+)(BasicModule);

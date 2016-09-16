@@ -4,7 +4,7 @@ class Module {
   constructor(name) {
     this.id = guid();
     this.name = name;
-    this.ins = ['a'];
+    this.ins = ['mean', 'std'];
     this.outs = ['b'];
   }
 }

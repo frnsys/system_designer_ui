@@ -5,7 +5,6 @@ import Menu from './Menu';
 
 class Workspace extends React.Component {
   render() {
-    const items = {'foo': 'bar'};
     return (
       <main>
         <Menu project={this.props.project} />

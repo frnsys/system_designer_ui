@@ -1,10 +1,11 @@
+import _ from 'underscore';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Edge from './Edge';
 import Module from '../Module';
 import Events from '../Events';
 import TentativeEdge from './TentativeEdge';
-import BasicModuleComponent from './modules/Basic';
+import BasicModule from './modules/Basic';
 import { DropTarget, DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
@@ -16,7 +17,20 @@ const dropTarget = {
     const {x, y} = component.props.project.positions[item.id];
     const left = Math.round(x + delta.x);
     const top = Math.round(y + delta.y);
+    let mod = component.modules[item.id];
     component.props.project.positions[item.id] = {x: left, y: top};
+
+    // update all input and output positions
+    _.each(mod.inputPositions, function(val, key) {
+      val.top += delta.y;
+      val.left += delta.x;
+      mod.inputPositions[key] = val;
+    });
+    _.each(mod.outputPositions, function(val, key) {
+      val.top += delta.y;
+      val.left += delta.x;
+      mod.outputPositions[key] = val;
+    });
     component.forceUpdate();
   }
 };
@@ -33,6 +47,13 @@ class Scene extends React.Component {
     // dragging preview module. it looks ok if we just hide the edges
     // until it's done being dragged.
     this.state = {draggingModuleId: undefined};
+    this.modules = {};
+  }
+
+  registerModule(id, el) {
+    if (!(id in this.modules)) {
+      this.modules[id] = el.decoratedComponentInstance;
+    }
   }
 
   render() {
@@ -41,8 +62,9 @@ class Scene extends React.Component {
         <div className="modules">
           {
             Object.keys(this.props.project.graph.modules).map(modId =>
-              <BasicModuleComponent module={this.props.project.graph.modules[modId]}
+              <BasicModule module={this.props.project.graph.modules[modId]}
                 scene={this} key={modId}
+                ref={this.registerModule.bind(this, modId)}
                 project={this.props.project} />)
           }
         </div>

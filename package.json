@@ -14,11 +14,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "jstat": "^1.5.3",
     "react": "^0.14.5",
     "react-canvas": "^1.2.0",
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
-    "react-dom": "^0.14.5"
+    "react-dom": "^0.14.5",
+    "underscore": "^1.8.3",
+    "victory": "^0.12.0"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
