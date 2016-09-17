@@ -21,6 +21,7 @@
     "react-dnd": "^2.1.4",
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^0.14.5",
+    "react-modal": "^1.4.0",
     "underscore": "^1.8.3",
     "victory": "^0.12.0"
   },

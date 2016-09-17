@@ -143,7 +143,14 @@ class Scene extends React.Component {
   }
 
   removeEdge(edge) {
-    this.props.project.graph.removeEdge(edge.edge);
+    this.props.project.graph.removeEdge(edge);
+    delete this.edges[edge.id];
+    this.forceUpdate();
+  }
+
+  removeModule(module) {
+    this.props.project.graph.removeModule(module);
+    delete this.modules[module.id];
     this.forceUpdate();
   }
 

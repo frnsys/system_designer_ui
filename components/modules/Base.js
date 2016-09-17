@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
+import Confirm from '../modals/Confirm.js';
 import ReactDOM from 'react-dom';
 import Draggable from './Draggable';
 import TextField from '../fields/Text';
@@ -9,6 +10,7 @@ class BaseModule extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
+      showDisplay: true,
       disableDrag: false,
       name: props.module.name,
       vars: Object.keys(props.module.ins).reduce(function(m, name) {
@@ -92,8 +94,26 @@ class BaseModule extends React.Component {
     this.refs.controls.style.display = show ? 'block' : 'none';
   }
 
+  renderControls() {
+    return <ul className="controls" ref="controls" style={{display: 'none'}}>
+      <li onClick={() => this.setState({showDisplay: !this.state.showDisplay})}>
+        <img src={`/assets/icons/${this.state.showDisplay ? 'eye_closed' : 'eye'}.svg`} className="icon"/>
+      </li>
+      <li onClick={this.remove.bind(this)}>
+        <img src="/assets/icons/x.svg" className="icon"/>
+      </li>
+    </ul>
+  }
+
+  remove() {
+    this.refs.confirm.setState({
+      open: true,
+      message: 'You sure you want to remove this module?',
+      onYes: () => this.props.scene.removeModule(this.props.module)
+    });
+  }
+
   // define in subclasses
-  renderControls() {}
   renderDisplay() {}
 
   render() {
@@ -143,6 +163,7 @@ class BaseModule extends React.Component {
       onMouseEnter={this.toggleControls.bind(this, true)}
       onMouseLeave={this.toggleControls.bind(this, false)}
       style={style}>
+        <Confirm ref="confirm"/>
         {this.renderControls()}
         {this.renderDisplay()}
         {name}
