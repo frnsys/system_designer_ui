@@ -6,8 +6,8 @@ class Chart extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      domain: [-2,2],
-      range: [0,0.5],
+      domain: props.domain,
+      range: props.range,
       show: true
     };
   }
@@ -43,11 +43,23 @@ class Chart extends React.Component {
 
   render() {
     if (this.state.show) {
+      const axisStyle = {
+        tickLabels: {
+          fontFamily: 'Cousine',
+          fontSize:'18px',
+          fill: '#777'
+        },
+        axis: {
+          strokeWidth: 4,
+          stroke: '#ddd'
+        }
+      };
       return <div
         onMouseEnter={this.toggleControls.bind(this, true)}
         onMouseLeave={this.toggleControls.bind(this, false)}
         className="module-chart">
-        <div className="chart-toggle" onClick={() => this.setState({show:false})}>*</div>
+        <div className="chart-toggle" onClick={() => this.setState({show:false})}>
+          <img src="/assets/icons/eye_closed.svg" className="icon"/></div>
         <ul className="module-chart-controls" ref="controls">
           <li>
             <label>domain: </label>
@@ -74,7 +86,7 @@ class Chart extends React.Component {
               name="range_l"
               onChange={this.onChange.bind(this)}
               onFinish={this.onChange.bind(this)}
-              validate={v => v > this.state.range[0]}
+              validate={v => v < this.state.range[1]}
             />
             <span> to </span>
             <NumberField
@@ -82,22 +94,31 @@ class Chart extends React.Component {
               name="range_u"
               onChange={this.onChange.bind(this)}
               onFinish={this.onChange.bind(this)}
-              validate={v => v > this.state.range[1]}
+              validate={v => v > this.state.range[0]}
             />
           </li>
         </ul>
         <VictoryChart domain={{x: this.state.domain, y: this.state.range}}>
-          <VictoryLine y={this.props.func} />
+          <VictoryAxis style={axisStyle}/>
+          <VictoryAxis dependentAxis style={axisStyle}/>
+          <VictoryLine y={this.props.func} style={{data:{strokeWidth: 8}}}/>
         </VictoryChart>
       </div>
     } else {
-      return <div className="chart-toggle" onClick={() => this.setState({show: true})}>O</div>;
+      return <div className="chart-toggle" onClick={() => this.setState({show: true})}>
+        <img src="/assets/icons/eye.svg" className="icon"/></div>;
     }
   }
 }
 
 Chart.propTypes = {
-  func: React.PropTypes.func.isRequired
+  func: React.PropTypes.func.isRequired,
+  domain: React.PropTypes.array,
+  range: React.PropTypes.array
 };
+Chart.defaultProps = {
+  domain: [-2,2],
+  range: [0,0.5]
+}
 
 export default Chart;

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "jstat": "^1.5.3",
+    "mathjs": "^3.5.1",
     "react": "^0.14.5",
     "react-canvas": "^1.2.0",
     "react-dnd": "^2.1.4",
