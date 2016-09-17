@@ -16,11 +16,10 @@ class BaseField extends React.Component {
 
 BaseField.propTypes = {
   value: React.PropTypes.any.isRequired,
-  onFinish: React.PropTypes.func.isRequired,
   name: React.PropTypes.string.isRequired,
+  onFinish: React.PropTypes.func.isRequired,
   onChange: React.PropTypes.func,
-  validate: React.PropTypes.func,
-  className: React.PropTypes.string
+  validate: React.PropTypes.func
 };
 
 export default BaseField;

@@ -7,11 +7,18 @@ class NumberField extends TextField {
     setTimeout(function() { element.select(); }, 10);
   }
 
+  validate(val) {
+    return !isNaN(val) && isFinite(val) && super.validate(val);
+  }
+
+  processVal(val) {
+    return parseFloat(val);
+  }
+
   renderField() {
     return <input
-            className={this.className}
             defaultValue={this.props.value}
-            onInput={this.textChanged}
+            onInput={this.changed}
             onBlur={this.finishEditing}
             ref="input"
             type="number"

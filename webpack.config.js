@@ -33,7 +33,11 @@ module.exports = {
   },
   resolve: {
     extensions: ['', '.js', '.sass'],
-    modulesDirectories: ['node_modules']
+    modulesDirectories: ['node_modules'],
+    alias: {
+      'src': path.resolve('./src'),
+      'components': path.resolve('./components'),
+    }
   }
 };
 

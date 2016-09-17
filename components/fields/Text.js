@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import BaseField from './Base';
-import { bindHandlers } from '../../Util';
+import { bindHandlers } from 'src/Util';
 
 class TextField extends BaseField {
   constructor(props, context) {
@@ -42,15 +42,29 @@ class TextField extends BaseField {
   }
 
   validate(val) {
-    return val.length > 0 && super.validate(val);
+    return val && super.validate(val);
+  }
+
+  processVal(val) {
+    return val;
+  }
+
+  processUpdate() {
+    let val = this.processVal(ReactDOM.findDOMNode(this.refs.input).value),
+        valid = this.validate(val);
+    this.setState({invalid: !valid});
+    if (valid) {
+      let update = {};
+      update[this.props.name] = val;
+      return update;
+    }
+    return false;
   }
 
   finishEditing() {
-    let val = ReactDOM.findDOMNode(this.refs.input).value,
-        valid = this.validate(val);
-    this.setState({invalid: !valid});
-    if(valid && this.props.value !== val) {
-      this.commit(val);
+    let update = this.processUpdate();
+    if (update) {
+      this.props.onFinish(update);
     }
     this.cancelEditing();
   }
@@ -61,28 +75,15 @@ class TextField extends BaseField {
 
   changed() {
     if (this.props.onChange) {
-      let val = ReactDOM.findDOMNode(this.refs.input).value,
-          valid = this.validate(val);
-      this.setState({invalid: !valid});
-      if(valid && this.props.value !== val) {
-        let update = {};
-        update[this.props.name] = val;
+      let update = this.processUpdate();
+      if (update) {
         this.props.onChange(update);
       }
     }
   }
 
-  commit(val) {
-    if(!this.state.invalid) {
-      let update = {};
-      update[this.props.name] = val;
-      this.props.onFinish(update);
-    }
-  }
-
   renderField() {
     return <input
-            className={this.className}
             defaultValue={this.props.value}
             onInput={this.changed}
             onBlur={this.finishEditing}
@@ -93,7 +94,6 @@ class TextField extends BaseField {
   renderValue() {
     return <span
       tabIndex="0"
-      className={this.className}
       onFocus={this.startEditing}
       onClick={this.startEditing}>{this.props.value}</span>;
   }

@@ -1,13 +1,14 @@
 import _ from 'underscore';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Edge from './Edge';
-import Module from '../Module';
-import Events from '../Events';
-import TentativeEdge from './TentativeEdge';
-import BasicModule from './modules/Basic';
-import { DropTarget, DragDropContext } from 'react-dnd';
+import Module from 'src/Module';
+import Events from 'src/Events';
+import Edge from './edges/Edge';
+import TentativeEdge from './edges/Tentative';
+import GeneratorModule from './modules/Generator';
 import HTML5Backend from 'react-dnd-html5-backend';
+import { DropTarget, DragDropContext } from 'react-dnd';
+import { jStat } from 'jstat'; // TEMP TODO
 
 
 const dropTarget = {
@@ -21,15 +22,11 @@ const dropTarget = {
     component.props.project.positions[item.id] = {x: left, y: top};
 
     // update all input and output positions
-    _.each(mod.inputPositions, function(val, key) {
-      val.top += delta.y;
-      val.left += delta.x;
-      mod.inputPositions[key] = val;
-    });
-    _.each(mod.outputPositions, function(val, key) {
-      val.top += delta.y;
-      val.left += delta.x;
-      mod.outputPositions[key] = val;
+    ['inputPositions', 'outputPositions'].forEach((k) => {
+      Object.keys(mod[k]).forEach((id) => {
+        mod[k][id].top += delta.y;
+        mod[k][id].left += delta.x;
+      })
     });
     component.forceUpdate();
   }
@@ -62,10 +59,12 @@ class Scene extends React.Component {
         <div className="modules">
           {
             Object.keys(this.props.project.graph.modules).map(modId =>
-              <BasicModule module={this.props.project.graph.modules[modId]}
+              <GeneratorModule module={this.props.project.graph.modules[modId]}
                 scene={this} key={modId}
                 ref={this.registerModule.bind(this, modId)}
-                project={this.props.project} />)
+                project={this.props.project}
+                func={(data) => jStat.normal.pdf(data.x, data.vars.mean, data.vars.std)}
+                />)
           }
         </div>
         <svg className="edges">

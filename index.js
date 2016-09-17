@@ -2,8 +2,8 @@ import './css/index.sass';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Project from './components/Project';
-import Workspace from './components/views/Workspace';
+import Project from 'src/Project';
+import Workspace from 'components/Workspace';
 
 ReactDOM.render(
   <Workspace project={new Project()} />,

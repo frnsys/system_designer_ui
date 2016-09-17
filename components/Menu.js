@@ -1,6 +1,6 @@
 import React from 'react';
-import Module from '../Module';
-import Events from '../Events';
+import Module from 'src/Module';
+import Events from 'src/Events';
 
 
 class Menu extends React.Component {
@@ -25,4 +25,3 @@ Menu.propTypes = {
 }
 
 export default Menu;
-

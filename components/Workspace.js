@@ -2,7 +2,6 @@ import React from 'react';
 import Scene from './Scene';
 import Menu from './Menu';
 
-
 class Workspace extends React.Component {
   render() {
     return (
