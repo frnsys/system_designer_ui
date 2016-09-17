@@ -6,16 +6,12 @@ import Chart from '../Chart';
 class GeneratorModule extends BaseModule {
   func(data) {
     data.vars = this.state.vars;
-    return this.props.func(data);
+    return this.props.module.func(data);
   }
 
   renderDisplay() {
     return <Chart func={this.func.bind(this)} />;
   }
 }
-
-GeneratorModule.propTypes = Object.assign({
-  func: React.PropTypes.func.isRequired
-}, BaseModule.propTypes);
 
 export default Draggable(GeneratorModule);

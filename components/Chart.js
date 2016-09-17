@@ -54,6 +54,12 @@ class Chart extends React.Component {
           stroke: '#ddd'
         }
       };
+      const lineStyle = {
+        data:{
+          strokeWidth: 8,
+          stroke:'#a72ee6'
+        }
+      };
       return <div
         onMouseEnter={this.toggleControls.bind(this, true)}
         onMouseLeave={this.toggleControls.bind(this, false)}
@@ -101,7 +107,7 @@ class Chart extends React.Component {
         <VictoryChart domain={{x: this.state.domain, y: this.state.range}}>
           <VictoryAxis style={axisStyle}/>
           <VictoryAxis dependentAxis style={axisStyle}/>
-          <VictoryLine y={this.props.func} style={{data:{strokeWidth: 8}}}/>
+          <VictoryLine y={this.props.func} style={lineStyle}/>
         </VictoryChart>
       </div>
     } else {

@@ -1,16 +1,11 @@
 import _ from 'underscore';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Module from 'src/Module';
 import Events from 'src/Events';
 import Edge from './edges/Edge';
 import TentativeEdge from './edges/Tentative';
-// import GeneratorModule from './modules/Generator';
-import FunctionModule from './modules/Function';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DropTarget, DragDropContext } from 'react-dnd';
-import { jStat } from 'jstat'; // TEMP TODO
-
 
 const dropTarget = {
   drop(props, monitor, component) {
@@ -60,17 +55,7 @@ class Scene extends React.Component {
         <div className="modules">
           {
             Object.keys(this.props.project.graph.modules).map(modId =>
-              // <GeneratorModule module={this.props.project.graph.modules[modId]}
-              //   scene={this} key={modId}
-              //   ref={this.registerModule.bind(this, modId)}
-              //   project={this.props.project}
-              //   func={(data) => jStat.normal.pdf(data.x, data.vars.mean, data.vars.std)}
-              //   />)
-              <FunctionModule module={this.props.project.graph.modules[modId]}
-                scene={this} key={modId}
-                ref={this.registerModule.bind(this, modId)}
-                project={this.props.project}
-                />)
+              this.props.project.graph.modules[modId].component(this))
           }
         </div>
         <svg className="edges">

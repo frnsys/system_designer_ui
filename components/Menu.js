@@ -1,20 +1,22 @@
 import React from 'react';
-import Module from 'src/Module';
 import Events from 'src/Events';
+import FunctionModule from 'src/modules/Function';
+import GeneratorModule from 'src/modules/Generator';
 
 
 class Menu extends React.Component {
   render() {
     return (
       <ul className="menu">
-        <li onClick={this.addModule.bind(this)}>+ add module</li>
+        <li onClick={this.addModule.bind(this, FunctionModule)}>+ add function</li>
+        <li onClick={this.addModule.bind(this, GeneratorModule)}>+ add generator</li>
       </ul>
     );
   }
 
-  addModule() {
+  addModule(type) {
     // TODO temp arbitrary
-    var mod = new Module('new module');
+    var mod = new type('new module');
     this.props.project.addModule(mod, 100, 100);
     Events.emit('module_added', mod);
   }

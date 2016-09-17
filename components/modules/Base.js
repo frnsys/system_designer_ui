@@ -10,7 +10,7 @@ class BaseModule extends React.Component {
     super(props, context);
     this.state = {
       disableDrag: false,
-      name: 'Base Module',
+      name: props.module.name,
       vars: Object.keys(props.module.ins).reduce(function(m, name) {
         m[name] = props.module.ins[name].default || 0;
         return m;
