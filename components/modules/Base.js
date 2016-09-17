@@ -16,32 +16,92 @@ class BaseModule extends React.Component {
         return m;
       }, {})
     };
-    this.inputPositions = {};
-    this.outputPositions = {};
+
+    this._inputs = {};
+    this._outputs = {};
+    this.inputBoxes = {};
+    this.outputBoxes = {};
   }
 
-  registerInputPosition(el) {
-    if (el !== null && !(el.props.inputNum in this.inputPositions)) {
-      this.inputPositions[el.props.inputNum] = _.clone(ReactDOM.findDOMNode(el.refs.input).getBoundingClientRect());
+  registerInput(comp) {
+    if (comp !== null) {
+      this._inputs[parseInt(comp.props.inputNum)] = comp.refs.input;
     }
   }
 
-  registerOutputPosition(i, el) {
-    if (el !== null && !(i in this.outputPositions)) {
-      this.outputPositions[i] = _.clone(ReactDOM.findDOMNode(el).getBoundingClientRect());
+  registerOutput(i, comp) {
+    if (comp !== null) {
+      this._outputs[i] = comp;
     }
   }
 
-  renderDisplay() {
-    // define in subclasses
+  updateInputBoxes() {
+    Object.keys(this._inputs).forEach(i => {
+      this.inputBoxes[i] = _.clone(ReactDOM.findDOMNode(this._inputs[i]).getBoundingClientRect());
+    });
+
+    // ensure that incoming edges are pointed to the correct position
+    let inEdges = this.props.project.graph.inEdges[this.props.module.id] || [];
+    Object.keys(inEdges).forEach(i => {
+      let edge = inEdges[i],
+          edgeComponent = this.props.scene.edges[edge.id],
+          box = this.inputBoxes[edge.input];
+      if (edgeComponent) {
+        edgeComponent.setState({
+          head: {
+            x: box.left,
+            y: box.top
+          }
+        });
+      }
+    });
   }
+
+  updateOutputBoxes() {
+    Object.keys(this._outputs).forEach(i => {
+      this.outputBoxes[i] = _.clone(ReactDOM.findDOMNode(this._outputs[i]).getBoundingClientRect());
+    });
+
+    // ensure that outgoing edges are pointed to the correct position
+    let outEdges = this.props.project.graph.outEdges[this.props.module.id] || [];
+    Object.keys(outEdges).forEach(i => {
+      let edges = outEdges[i]; // one output can go to multiple inputs
+      edges.forEach(edge => {
+        let edgeComponent = this.props.scene.edges[edge.id],
+            box = this.outputBoxes[edge.output];
+        if (edgeComponent) {
+          edgeComponent.setState({
+            tail: {
+              x: box.left,
+              y: box.top
+            }
+          });
+        }
+      });
+    });
+  }
+
+  componentDidUpdate() {
+    if (!this.props.isDragging) {
+      this.updateInputBoxes();
+      this.updateOutputBoxes();
+    }
+  }
+
+  toggleControls(show) {
+    this.refs.controls.style.display = show ? 'block' : 'none';
+  }
+
+  // define in subclasses
+  renderControls() {}
+  renderDisplay() {}
 
   render() {
     // hide while dragging
     if (this.props.isDragging) {
       return null;
     }
-    const pos = this.props.project.positions[this.props.module.id];
+    const pos = this.props.project.positions[this.props.module.id]; // TODO this might not be necessary anymore do it a diff way
     const style = {
       position: 'absolute',
       top: pos.y,
@@ -50,6 +110,7 @@ class BaseModule extends React.Component {
     };
     const nameField = <TextField
       value={this.state.name}
+      onChange={this.serverCallback.bind(this)}
       onFinish={this.serverCallback.bind(this)}
       name="name"
       className="module-name" />;
@@ -60,7 +121,7 @@ class BaseModule extends React.Component {
               onMouseDown={this.onOutputMouseDown.bind(this, 0)}
               onMouseEnter={() => this.setState({ disableDrag: true })}
               onMouseLeave={() => this.setState({ disableDrag: false })}
-              ref={this.registerOutputPosition.bind(this, 0)}
+              ref={this.registerOutput.bind(this, 0)}
               key="0" /></div>;
       outputs = '';
     } else {
@@ -71,18 +132,30 @@ class BaseModule extends React.Component {
             onMouseEnter={() => this.setState({ disableDrag: true })}
             onMouseLeave={() => this.setState({ disableDrag: false })}
             key={i}
-            ref={this.registerOutputPosition.bind(this, i)}
+            ref={this.registerOutput.bind(this, i)}
           />
         , this);
     }
 
-    const element = <div className="module module-basic" data-module-id={this.props.module.id} style={style}>
+    const element = <div
+      className={`module module-${this.moduleType}`}
+      data-module-id={this.props.module.id}
+      onMouseEnter={this.toggleControls.bind(this, true)}
+      onMouseLeave={this.toggleControls.bind(this, false)}
+      style={style}>
+        {this.renderControls()}
         {this.renderDisplay()}
         {name}
         <ul className="variables">
           {
             Object.keys(this.state.vars).map((name, i) =>
-              <BaseVariable name={name} inputNum={i} onChange={this.onVarChange.bind(this)} ref={this.registerInputPosition.bind(this)} key={i} val={this.state.vars[name]} validate={this.props.module.ins[name].validate}/>)
+              <BaseVariable name={name}
+                key={i}
+                inputNum={i}
+                onChange={this.onVarChange.bind(this)}
+                ref={this.registerInput.bind(this)}
+                val={this.state.vars[name]}
+                validate={this.props.module.ins[name].validate}/>)
           }
         </ul>
         <div className="outputs">{outputs}</div>
@@ -116,7 +189,7 @@ class BaseModule extends React.Component {
   }
 };
 
-
+BaseModule.moduleType = 'base';
 BaseModule.propTypes = {
   project: React.PropTypes.object.isRequired,
   module: React.PropTypes.object.isRequired,

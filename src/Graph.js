@@ -1,3 +1,5 @@
+import { guid } from './Util';
+
 class Graph {
   // directed graph connecting
   // module outputs to module inputs
@@ -38,6 +40,7 @@ class Graph {
 
   addEdge(fromModule, outputNum, toModule, inputNum) {
     const edge = {
+      id: guid(),
       from: fromModule,
       output: outputNum,
       to: toModule,

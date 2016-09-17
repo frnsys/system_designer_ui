@@ -44,15 +44,15 @@ html, body
   position: relative
   background: #f8f8f8
   border-radius: 6px
-  border: 3px solid #1B2CED
+  border: 3px solid #222
   box-shadow: 2px 2px 4px rgba(0,0,0,0.4)
   padding: 0.6em
   width: 14em
 
   .variable
     position: relative
-    height: 1.2em
-    margin: 0.4em 0
+    height: 1em
+    margin: 0.1em 0
     padding: 0.1em 0 0 0
     .variable-display
       display: flex
@@ -60,7 +60,7 @@ html, body
   .input,
   .output
     width: 5px
-    height: 1.2em
+    height: 1em
     display: inline-block
     cursor: crosshair
     position: absolute
@@ -75,6 +75,28 @@ html, body
   input
     background: #a2f9a3
 
+  .controls
+    position: absolute
+    top: -2.2em
+    left: 0
+    right: 0
+    margin: 0
+    padding: 0.4em
+    background: rgba(0,0,0,0.1)
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.1)
+    border-radius: 0.4em 0.4em 0 0
+    li
+      padding: 0.1em
+      opacity: 0.25
+      &:hover
+        opacity: 1
+
+.module-generator
+  border: 3px solid #ade1fb
+
+.module-function
+  border: 3px solid #1B2CED
+
 input
   font-family: 'Cousine', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'
   font-size: 1em
@@ -86,8 +108,6 @@ ul
 
 .module-chart
   position: relative
-  .chart-toggle
-    position: absolute
 .module-chart-controls
   position: absolute
   top: 0
@@ -97,9 +117,11 @@ ul
   color: #fff
   padding: 0.4em
   display: none
+  input
+    width: 4em
+
+.variables
+  margin: 1em 0 0 0
 
 .icon
   width: 14px
-  opacity: 0.25
-  &:hover
-    opacity: 1

@@ -14,17 +14,7 @@ const dropTarget = {
     const {x, y} = component.props.project.positions[item.id];
     const left = Math.round(x + delta.x);
     const top = Math.round(y + delta.y);
-    let mod = component.modules[item.id];
     component.props.project.positions[item.id] = {x: left, y: top};
-
-    // update all input and output positions
-    ['inputPositions', 'outputPositions'].forEach((k) => {
-      Object.keys(mod[k]).forEach((id) => {
-        mod[k][id].top += delta.y;
-        mod[k][id].left += delta.x;
-      })
-    });
-    component.forceUpdate();
   }
 };
 
@@ -40,13 +30,23 @@ class Scene extends React.Component {
     // dragging preview module. it looks ok if we just hide the edges
     // until it's done being dragged.
     this.state = {draggingModuleId: undefined};
+
+    // these are used so modules and edges can
+    // communicate with each other (is there a better way?)
     this.modules = {};
+    this.edges = {};
   }
 
   registerModule(id, el) {
-    if (!(id in this.modules)) {
+    if (el !== null) {
       this.modules[id] = el.decoratedComponentInstance;
     }
+  }
+
+  registerEdge(id, el) {
+    // not checking for null b/c if an edge is
+    // unmounted, we want to know
+    this.edges[id] = el;
   }
 
   render() {
@@ -70,8 +70,11 @@ class Scene extends React.Component {
             this.props.project.graph.allEdges
               .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
               .map((edge, i) =>
-                <Edge edge={edge} scene={this}
-                  project={this.props.project} key={i} />
+                <Edge edge={edge} key={i}
+                  toModule={this.modules[edge.to.id]}
+                  fromModule={this.modules[edge.from.id]}
+                  onClick={this.removeEdge.bind(this, edge)}
+                  ref={this.registerEdge.bind(this, edge.id)}/>
             )
           }
         </svg>
@@ -137,6 +140,11 @@ class Scene extends React.Component {
   componentWillUnmount() {
     Events.off('module_added', this.rerender);
     document.removeEventListener('mousemove', this._updateTentativeEdge);
+  }
+
+  removeEdge(edge) {
+    this.props.project.graph.removeEdge(edge.edge);
+    this.forceUpdate();
   }
 
   drawTentativeEdge(fromModule, outputNum, x, y) {
