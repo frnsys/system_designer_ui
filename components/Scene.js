@@ -7,6 +7,10 @@ import TentativeEdge from './edges/Tentative';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DropTarget, DragDropContext } from 'react-dnd';
 
+const zoomSpeed = 0.001;
+const maxZoom = 1.8;
+const minZoom = 0.2;
+
 const dropTarget = {
   drop(props, monitor, component) {
     const item = monitor.getItem();
@@ -29,7 +33,10 @@ class Scene extends React.Component {
     // so we can't re-draw connections to the\
     // dragging preview module. it looks ok if we just hide the edges
     // until it's done being dragged.
-    this.state = {draggingModuleId: undefined};
+    this.state = {
+      draggingModuleId: undefined,
+      zoom: 1
+    };
 
     // these are used so modules and edges can
     // communicate with each other (is there a better way?)
@@ -49,9 +56,18 @@ class Scene extends React.Component {
     this.edges[id] = el;
   }
 
+  zoom(e) {
+    var zoom = this.state.zoom - (e.deltaY * zoomSpeed);
+    zoom = Math.min(maxZoom, zoom);
+    zoom = Math.max(minZoom, zoom);
+    this.setState({
+      zoom: zoom
+    });
+  }
+
   render() {
     return this.props.connectDropTarget(
-      <div className="scene">
+      <div className="scene" style={{transform: `scale(${this.state.zoom})`}}>
         <div className="modules">
           {
             Object.keys(this.props.project.graph.modules).map(modId =>
@@ -89,9 +105,12 @@ class Scene extends React.Component {
     };
     Events.on('module_added', this.rerender);
 
+    this._zoom  = this.zoom.bind(this);
     this._updateTentativeEdge = this.updateTentativeEdge.bind(this);
     this._releaseTentativeEdge = this.releaseTentativeEdge.bind(this);
     document.addEventListener('mousemove', this._updateTentativeEdge);
+
+    document.addEventListener('wheel', this._zoom);
   }
 
   updateTentativeEdge(ev) {
@@ -140,6 +159,7 @@ class Scene extends React.Component {
   componentWillUnmount() {
     Events.off('module_added', this.rerender);
     document.removeEventListener('mousemove', this._updateTentativeEdge);
+    document.removeEventListener('wheel', this._zoom);
   }
 
   removeEdge(edge) {
