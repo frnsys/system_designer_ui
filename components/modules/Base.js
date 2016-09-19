@@ -124,8 +124,8 @@ class BaseModule extends React.Component {
     const pos = this.props.project.positions[this.props.module.id]; // TODO this might not be necessary anymore do it a diff way
     const style = {
       position: 'absolute',
-      top: pos.y,
-      left: pos.x,
+      top: pos.y + this.props.scene.state.offset.y,
+      left: pos.x + this.props.scene.state.offset.x,
       opacity: this.props.isDragging ? 0.5 : 1
     };
     const nameField = <TextField

@@ -29,12 +29,13 @@ class Edge extends React.Component {
   }
 
   render() {
+    let sceneOffset = this.props.scene.state.offset;
     return (
       <line className="edge"
-        x1={this.state.tail.x + xOffset}
-        y1={this.state.tail.y + yOffset}
-        x2={this.state.head.x + xOffset}
-        y2={this.state.head.y + yOffset}
+        x1={this.state.tail.x + xOffset + sceneOffset.x}
+        y1={this.state.tail.y + yOffset + sceneOffset.y}
+        x2={this.state.head.x + xOffset + sceneOffset.x}
+        y2={this.state.head.y + yOffset + sceneOffset.y}
         onClick={this.props.onClick} />
     );
   }
@@ -43,6 +44,7 @@ class Edge extends React.Component {
 
 Edge.propTypes = {
   edge: React.PropTypes.object.isRequired,
+  scene: React.PropTypes.object.isRequired,
   onClick: React.PropTypes.func.isRequired,
   toModule: React.PropTypes.object.isRequired,
   fromModule: React.PropTypes.object.isRequired

@@ -30,12 +30,17 @@ class Scene extends React.Component {
     // we hide edges to the module
     // being dragged. the html5 drag-and-drop
     // backend does not support events while dragging,
-    // so we can't re-draw connections to the\
+    // so we can't re-draw connections to the
     // dragging preview module. it looks ok if we just hide the edges
     // until it's done being dragged.
     this.state = {
       draggingModuleId: undefined,
-      zoom: 1
+      zoom: 1,
+      panning: false,
+      offset: {
+        x: 0,
+        y: 0
+      }
     };
 
     // these are used so modules and edges can
@@ -65,35 +70,74 @@ class Scene extends React.Component {
     });
   }
 
+  pan(e) {
+    if (this.state.panning) {
+      var delta = {
+        x: (e.clientX - this.state.panStart.x) * (1/this.state.zoom),
+        y: (e.clientY - this.state.panStart.y) * (1/this.state.zoom)
+      }
+      this.setState({
+        offset: {
+          x: this.state.offset.x + delta.x,
+          y: this.state.offset.y + delta.y
+        },
+        panStart: {
+          x: e.clientX,
+          y: e.clientY,
+        }
+      });
+    }
+  }
+
+  startPan(e) {
+    // check that the click is
+    // on an empty part of the scene
+    // which happens to be the edges element
+    if (e.target.classList.contains('edges')) {
+      this.setState({
+        panning: true,
+        panStart: {
+          x: e.clientX,
+          y: e.clientY,
+        }
+      });
+    }
+  }
+
   render() {
     return this.props.connectDropTarget(
-      <div className="scene" style={{transform: `scale(${this.state.zoom})`}}>
-        <div className="modules">
-          {
-            Object.keys(this.props.project.graph.modules).map(modId =>
-              this.props.project.graph.modules[modId].component(this))
-          }
+      <div className={`scene ${this.state.panning ? 'panning': ''}`}
+        onMouseDown={this.startPan.bind(this)}
+        onMouseUp={() => this.setState({panning: false})}
+        onMouseMove={this.pan.bind(this)}>
+        <div className="scene-stage" style={{transform: `scale(${this.state.zoom})`}}>
+          <div className="modules">
+            {
+              Object.keys(this.props.project.graph.modules).map(modId =>
+                this.props.project.graph.modules[modId].component(this))
+            }
+          </div>
+          <svg className="edges">
+            <defs>
+              <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#00FF7C"/>
+                <stop offset="100%" stopColor="#ff7676"/>
+              </linearGradient>
+            </defs>
+            <TentativeEdge ref="tentativeEdge" />
+            {
+              this.props.project.graph.allEdges
+                .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
+                .map((edge, i) =>
+                  <Edge edge={edge} key={i} scene={this}
+                    toModule={this.modules[edge.to.id]}
+                    fromModule={this.modules[edge.from.id]}
+                    onClick={this.removeEdge.bind(this, edge)}
+                    ref={this.registerEdge.bind(this, edge.id)}/>
+              )
+            }
+          </svg>
         </div>
-        <svg className="edges">
-          <defs>
-            <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stopColor="#00FF7C"/>
-              <stop offset="100%" stopColor="#ff7676"/>
-            </linearGradient>
-          </defs>
-          <TentativeEdge ref="tentativeEdge" />
-          {
-            this.props.project.graph.allEdges
-              .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
-              .map((edge, i) =>
-                <Edge edge={edge} key={i}
-                  toModule={this.modules[edge.to.id]}
-                  fromModule={this.modules[edge.from.id]}
-                  onClick={this.removeEdge.bind(this, edge)}
-                  ref={this.registerEdge.bind(this, edge.id)}/>
-            )
-          }
-        </svg>
       </div>
     );
   }
