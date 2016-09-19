@@ -106,7 +106,8 @@ class Scene extends React.Component {
     // check that the click is
     // on an empty part of the scene
     // which happens to be the edges element
-    if (e.target.classList.contains('edges')) {
+    // or the scene if zoomed out
+    if (e.target.classList.contains('edges') || e.target.classList.contains('scene')) {
       this.setState({
         panning: true,
         panStart: {
@@ -137,7 +138,7 @@ class Scene extends React.Component {
                 <stop offset="100%" stopColor="#ff7676"/>
               </linearGradient>
             </defs>
-            <TentativeEdge ref="tentativeEdge" />
+            <TentativeEdge ref="tentativeEdge" scene={this} />
             {
               this.props.project.graph.allEdges
                 .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
@@ -176,9 +177,13 @@ class Scene extends React.Component {
     const line = this.refs.tentativeEdge;
     const domNode = ReactDOM.findDOMNode(this);
     const offset = domNode.getClientRects()[0];
+    var pos = this.truePos({
+      x: ev.clientX - offset.left,
+      y: ev.clientY - offset.top
+    }, this.state.zoom)
     line.setState({
-      drawToX: ev.clientX - offset.left,
-      drawToY: ev.clientY - offset.top
+      drawToX: pos.x,
+      drawToY: pos.y
     });
   }
 
@@ -238,11 +243,15 @@ class Scene extends React.Component {
     const line = this.refs.tentativeEdge;
     const domNode = ReactDOM.findDOMNode(this);
     const offset = domNode.getClientRects()[0];
+    var pos = this.truePos({
+      x: x - offset.left,
+      y: y - offset.top
+    }, this.state.zoom)
     line.setState({
       fromModule: fromModule,
       outputNum: outputNum,
-      startX: x - offset.left,
-      startY: y - offset.top,
+      startX: pos.x,
+      startY: pos.y,
       visible: true
     });
     document.addEventListener('mousedown', this._releaseTentativeEdge);
