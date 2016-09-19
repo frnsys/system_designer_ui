@@ -29,7 +29,6 @@ class Edge extends React.Component {
   }
 
   render() {
-    let sceneOffset = this.props.scene.state.offset;
     let head = this.props.scene.truePos({
       x: this.state.tail.x + xOffset,
       y: this.state.tail.y + yOffset
@@ -38,14 +37,12 @@ class Edge extends React.Component {
       x: this.state.head.x + xOffset,
       y: this.state.head.y + yOffset
     }, this.props.scene.state.zoom);
-    console.log(tail);
-    console.log(head);
     return (
       <line className="edge"
-        x1={tail.x + sceneOffset.x}
-        y1={tail.y + sceneOffset.y}
-        x2={head.x + sceneOffset.x}
-        y2={head.y + sceneOffset.y}
+        x1={tail.x}
+        y1={tail.y}
+        x2={head.x}
+        y2={head.y}
         onClick={this.props.onClick} />
     );
   }

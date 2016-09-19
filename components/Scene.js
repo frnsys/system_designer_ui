@@ -119,12 +119,15 @@ class Scene extends React.Component {
   }
 
   render() {
+    const stageStyle = {
+      transform: `scale(${this.state.zoom}) translate(${this.state.offset.x}px, ${this.state.offset.y}px)`
+    }
     return this.props.connectDropTarget(
       <div className={`scene ${this.state.panning ? 'panning': ''}`}
         onMouseDown={this.startPan.bind(this)}
         onMouseUp={() => this.setState({panning: false})}
         onMouseMove={this.pan.bind(this)}>
-        <div className="scene-stage" ref="stage" style={{transform: `scale(${this.state.zoom})`}}>
+        <div className="scene-stage" ref="stage" style={stageStyle}>
           <div className="modules">
             {
               Object.keys(this.props.project.graph.modules).map(modId =>
@@ -138,7 +141,7 @@ class Scene extends React.Component {
                 <stop offset="100%" stopColor="#ff7676"/>
               </linearGradient>
             </defs>
-            <TentativeEdge ref="tentativeEdge" scene={this} />
+            <TentativeEdge ref="tentativeEdge"/>
             {
               this.props.project.graph.allEdges
                 .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
