@@ -16,8 +16,8 @@ const dropTarget = {
     const item = monitor.getItem();
     const delta = monitor.getDifferenceFromInitialOffset();
     const {x, y} = component.props.project.positions[item.id];
-    const left = Math.round(x + delta.x);
-    const top = Math.round(y + delta.y);
+    const left = Math.round(x + (delta.x * 1/component.state.zoom));
+    const top = Math.round(y + (delta.y * 1/component.state.zoom));
     component.props.project.positions[item.id] = {x: left, y: top};
   }
 };
@@ -47,6 +47,8 @@ class Scene extends React.Component {
     // communicate with each other (is there a better way?)
     this.modules = {};
     this.edges = {};
+
+    this.lastCursorPos = {x:0,y:0};
   }
 
   registerModule(id, el) {
@@ -62,16 +64,27 @@ class Scene extends React.Component {
   }
 
   zoom(e) {
+    e.preventDefault();
     var zoom = this.state.zoom - (e.deltaY * zoomSpeed);
     zoom = Math.min(maxZoom, zoom);
     zoom = Math.max(minZoom, zoom);
+
+    var before = this.truePos(this.lastCursorPos, this.state.zoom);
+    var after = this.truePos(this.lastCursorPos, zoom);
+    var offset = {
+      x: this.state.offset.x + -(before.x - after.x),
+      y: this.state.offset.y + -(before.y - after.y)
+    }
+
     this.setState({
-      zoom: zoom
+      zoom: zoom,
+      offset: offset
     });
   }
 
   pan(e) {
     if (this.state.panning) {
+      // scale by zoom amount for consistent panning distance
       var delta = {
         x: (e.clientX - this.state.panStart.x) * (1/this.state.zoom),
         y: (e.clientY - this.state.panStart.y) * (1/this.state.zoom)
@@ -110,7 +123,7 @@ class Scene extends React.Component {
         onMouseDown={this.startPan.bind(this)}
         onMouseUp={() => this.setState({panning: false})}
         onMouseMove={this.pan.bind(this)}>
-        <div className="scene-stage" style={{transform: `scale(${this.state.zoom})`}}>
+        <div className="scene-stage" ref="stage" style={{transform: `scale(${this.state.zoom})`}}>
           <div className="modules">
             {
               Object.keys(this.props.project.graph.modules).map(modId =>
@@ -152,7 +165,9 @@ class Scene extends React.Component {
     this._zoom  = this.zoom.bind(this);
     this._updateTentativeEdge = this.updateTentativeEdge.bind(this);
     this._releaseTentativeEdge = this.releaseTentativeEdge.bind(this);
+    this._updateCursorPos = this.updateCursorPos.bind(this);
     document.addEventListener('mousemove', this._updateTentativeEdge);
+    document.addEventListener('mousemove', this._updateCursorPos);
 
     document.addEventListener('wheel', this._zoom);
   }
@@ -203,6 +218,7 @@ class Scene extends React.Component {
   componentWillUnmount() {
     Events.off('module_added', this.rerender);
     document.removeEventListener('mousemove', this._updateTentativeEdge);
+    document.removeEventListener('mousemove', this._updateCursorPos);
     document.removeEventListener('wheel', this._zoom);
   }
 
@@ -230,6 +246,18 @@ class Scene extends React.Component {
       visible: true
     });
     document.addEventListener('mousedown', this._releaseTentativeEdge);
+  }
+
+  truePos(pos, zoom) {
+    return {
+      x: pos.x/zoom - this.state.offset.x,
+      y: pos.y/zoom - this.state.offset.y
+    };
+  }
+
+  updateCursorPos(ev) {
+    this.lastCursorPos.x = ev.pageX;
+    this.lastCursorPos.y = ev.pageY;
   }
 }
 
