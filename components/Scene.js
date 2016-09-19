@@ -92,7 +92,8 @@ class Scene extends React.Component {
   startPan(e) {
     // check that the click is
     // on an empty part of the scene
-    if (e.target.classList.contains('scene')) {
+    // which happens to be the edges element
+    if (e.target.classList.contains('edges')) {
       this.setState({
         panning: true,
         panStart: {
@@ -128,7 +129,7 @@ class Scene extends React.Component {
               this.props.project.graph.allEdges
                 .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
                 .map((edge, i) =>
-                  <Edge edge={edge} key={i}
+                  <Edge edge={edge} key={i} scene={this}
                     toModule={this.modules[edge.to.id]}
                     fromModule={this.modules[edge.from.id]}
                     onClick={this.removeEdge.bind(this, edge)}
@@ -221,7 +222,6 @@ class Scene extends React.Component {
     const line = this.refs.tentativeEdge;
     const domNode = ReactDOM.findDOMNode(this);
     const offset = domNode.getClientRects()[0];
-    console.log(offset);
     line.setState({
       fromModule: fromModule,
       outputNum: outputNum,
