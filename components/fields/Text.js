@@ -94,6 +94,7 @@ class TextField extends BaseField {
   renderValue() {
     return <span
       tabIndex="0"
+      style={{cursor: 'pointer'}}
       onFocus={this.startEditing}
       onClick={this.startEditing}>{this.props.value}</span>;
   }

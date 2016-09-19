@@ -7,12 +7,24 @@ html, body
   font-family: 'Cousine', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'
 
 .scene
-  position: absolute
+  position: fixed
   top: 0
   right: 0
   left: 0
   bottom: 0
   z-index: 0
+  overflow: hidden
+  cursor: grab
+  cursor: -webkit-grab
+  &.panning
+    cursor: grabbing
+    cursor: -webkit-grabbing
+.scene-stage
+  position: absolute
+  top: 0
+  left: 0
+  width: 0
+  height: 0
 
 .edges
   width: 100%
@@ -40,7 +52,6 @@ html, body
   stroke: url(#linear)
 
 .module
-  cursor: pointer
   position: relative
   background: #f8f8f8
   border-radius: 6px
@@ -48,6 +59,8 @@ html, body
   box-shadow: 2px 2px 4px rgba(0,0,0,0.4)
   padding: 0.6em
   width: 14em
+  cursor: grab
+  cursor: -webkit-grab
 
   .variable
     position: relative
@@ -90,6 +103,7 @@ html, body
       padding: 0.1em 0.35em
       opacity: 0.25
       display: inline-block
+      cursor: pointer
       &:hover
         opacity: 1
 
