@@ -23,15 +23,20 @@ class Graph {
 
   removeModule(mod) {
     // delete outgoing edges
-    for (let edge in this.outEdges[mod.id]) {
-      delete this.inEdges[edge.to.id][edge.input];
-    }
+    Object.keys(this.outEdges[mod.id] || []).forEach(output => {
+      this.outEdges[mod.id][output].forEach(edge => {
+        this.allEdges.splice(this.allEdges.indexOf(edge), 1);
+        delete this.inEdges[edge.to.id][edge.input];
+      });
+    });
 
     // delete incoming edges
-    for (let edge in this.inEdges[mod.id]) {
+    Object.keys(this.inEdges[mod.id] || []).forEach(input => {
+      var edge = this.inEdges[mod.id][input];
       const outs = this.outEdges[edge.from.id][edge.output];
       outs.splice(outs.indexOf(edge), 1);
-    }
+      this.allEdges.splice(this.allEdges.indexOf(edge), 1);
+    });
 
     delete this.outEdges[mod.id];
     delete this.inEdges[mod.id];

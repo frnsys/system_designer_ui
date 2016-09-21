@@ -61,15 +61,19 @@ class Scene extends React.Component {
   }
 
   registerModule(id, el) {
-    if (el !== null) {
+    if (el === null) {
+      delete this.modules[id];
+    } else {
       this.modules[id] = el.decoratedComponentInstance;
     }
   }
 
   registerEdge(id, el) {
-    // not checking for null b/c if an edge is
-    // unmounted, we want to know
-    this.edges[id] = el;
+    if (el === null) {
+      delete this.edges[id];
+    } else {
+      this.edges[id] = el;
+    }
   }
 
   zoom(e) {
@@ -245,8 +249,8 @@ class Scene extends React.Component {
   }
 
   removeModule(module) {
-    this.props.project.graph.removeModule(module);
     delete this.modules[module.id];
+    this.props.project.graph.removeModule(module);
     this.forceUpdate();
   }
 
