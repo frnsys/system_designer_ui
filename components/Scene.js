@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Events from 'src/Events';
 import Edge from './edges/Edge';
+import Confirm from './modals/Confirm.js';
 import TentativeEdge from './edges/Tentative';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DropTarget, DragDropContext } from 'react-dnd';
@@ -135,6 +136,7 @@ class Scene extends React.Component {
         onMouseDown={this.startPan.bind(this)}
         onMouseUp={() => this.setState({panning: false})}
         onMouseMove={this.pan.bind(this)}>
+        <Confirm ref="confirm"/>
         <div className="scene-stage" ref="stage" style={stageStyle}>
           <div className="modules">
             {

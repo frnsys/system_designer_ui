@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'underscore';
-import Confirm from '../modals/Confirm.js';
 import ReactDOM from 'react-dom';
 import Draggable from './Draggable';
 import TextField from '../fields/Text';
@@ -139,7 +138,7 @@ class BaseModule extends React.Component {
   }
 
   remove() {
-    this.refs.confirm.setState({
+    this.props.scene.refs.confirm.setState({
       open: true,
       message: 'You sure you want to remove this module?',
       onYes: () => this.props.scene.removeModule(this.props.module)
@@ -195,7 +194,6 @@ class BaseModule extends React.Component {
       onMouseEnter={this.toggleControls.bind(this, true)}
       onMouseLeave={this.toggleControls.bind(this, false)}
       style={style}>
-        <Confirm ref="confirm"/>
         {this.renderControls()}
         {this.renderDisplay()}
         {name}
