@@ -15,9 +15,8 @@ class Menu extends React.Component {
   }
 
   addModule(type) {
-    // TODO temp arbitrary
     var mod = new type('new module');
-    this.props.project.addModule(mod, 100, 100);
+    this.props.project.addModule(mod);
     Events.emit('module_added', mod);
   }
 }

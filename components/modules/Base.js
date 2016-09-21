@@ -6,12 +6,18 @@ import Draggable from './Draggable';
 import TextField from '../fields/Text';
 import BaseVariable from '../Variable';
 
+const startPos = {
+  x: 100,
+  y: 100
+};
+
 class BaseModule extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
       showDisplay: true,
       disableDrag: false,
+      position: _.clone(startPos),
       name: props.module.name,
       vars: Object.keys(props.module.ins).reduce(function(m, name) {
         m[name] = props.module.ins[name].default || 0;
@@ -35,6 +41,11 @@ class BaseModule extends React.Component {
     if (comp !== null) {
       this._outputs[i] = comp;
     }
+  }
+
+  componentDidMount() {
+    this.updateInputBoxes();
+    this.updateOutputBoxes();
   }
 
   updateInputBoxes() {
@@ -83,11 +94,10 @@ class BaseModule extends React.Component {
     });
   }
 
-  componentDidUpdate() {
-    if (!this.props.isDragging) {
-      this.updateInputBoxes();
-      this.updateOutputBoxes();
-    }
+  shouldComponentUpdate(nextProps, nextState) {
+    // TODO not sure why I have to make this explicit if nothing is changing the state/props?
+    // but only update if the props or state actually change
+    return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
   }
 
   toggleControls(show) {
@@ -121,11 +131,10 @@ class BaseModule extends React.Component {
     if (this.props.isDragging) {
       return null;
     }
-    const pos = this.props.project.positions[this.props.module.id]; // TODO this might not be necessary anymore do it a diff way
     const style = {
       position: 'absolute',
-      top: pos.y,
-      left: pos.x,
+      top: this.state.position.y,
+      left: this.state.position.x,
       opacity: this.props.isDragging ? 0.5 : 1
     };
     const nameField = <TextField
