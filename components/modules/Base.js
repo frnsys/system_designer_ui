@@ -48,6 +48,11 @@ class BaseModule extends React.Component {
     this.updateOutputBoxes();
   }
 
+  componentDidUpdate() {
+    this.updateInputBoxes();
+    this.updateOutputBoxes();
+  }
+
   updateInputBoxes() {
     Object.keys(this._inputs).forEach(i => {
       this.inputBoxes[i] = _.clone(ReactDOM.findDOMNode(this._inputs[i]).getBoundingClientRect());

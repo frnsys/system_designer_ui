@@ -25,12 +25,12 @@ const dropTarget = {
         y: top
       }
     }, function() {
-      setTimeout(function () {
-        window.requestAnimationFrame(function() {
-          module.updateInputBoxes();
-          module.updateOutputBoxes();
-        })
-      }, 0)
+      // setTimeout(function () {
+      //   window.requestAnimationFrame(function() {
+      //     module.updateInputBoxes();
+      //     module.updateOutputBoxes();
+      //   })
+      // }, 0)
     });
   }
 };
@@ -95,6 +95,12 @@ class Scene extends React.Component {
       zoom: zoom,
       offset: offset
     });
+
+    // update module input/output positions
+    Object.keys(this.modules).forEach(k => {
+      this.modules[k].updateInputBoxes();
+      this.modules[k].updateOutputBoxes();
+    });
   }
 
   pan(e) {
@@ -113,6 +119,12 @@ class Scene extends React.Component {
           x: e.clientX,
           y: e.clientY,
         }
+      });
+
+      // update module input/output positions
+      Object.keys(this.modules).forEach(k => {
+        this.modules[k].updateInputBoxes();
+        this.modules[k].updateOutputBoxes();
       });
     }
   }
