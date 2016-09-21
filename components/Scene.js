@@ -15,10 +15,23 @@ const dropTarget = {
   drop(props, monitor, component) {
     const item = monitor.getItem();
     const delta = monitor.getDifferenceFromInitialOffset();
-    const {x, y} = component.props.project.positions[item.id];
-    const left = Math.round(x + (delta.x * 1/component.state.zoom));
-    const top = Math.round(y + (delta.y * 1/component.state.zoom));
-    component.props.project.positions[item.id] = {x: left, y: top};
+    const module = component.modules[item.id];
+    const pos = module.state.position;
+    const left = Math.round(pos.x + (delta.x * 1/component.state.zoom));
+    const top = Math.round(pos.y + (delta.y * 1/component.state.zoom));
+    module.setState({
+      position: {
+        x: left,
+        y: top
+      }
+    }, function() {
+      // setTimeout(function () {
+      //   window.requestAnimationFrame(function() {
+      //     module.updateInputBoxes();
+      //     module.updateOutputBoxes();
+      //   })
+      // }, 0)
+    });
   }
 };
 
@@ -49,6 +62,8 @@ class Scene extends React.Component {
     this.edges = {};
 
     this.lastCursorPos = {x:0,y:0};
+
+    this._removeEdge = this.removeEdge.bind(this);
   }
 
   registerModule(id, el) {
@@ -80,6 +95,12 @@ class Scene extends React.Component {
       zoom: zoom,
       offset: offset
     });
+
+    // update module input/output positions
+    Object.keys(this.modules).forEach(k => {
+      this.modules[k].updateInputBoxes();
+      this.modules[k].updateOutputBoxes();
+    });
   }
 
   pan(e) {
@@ -99,6 +120,12 @@ class Scene extends React.Component {
           y: e.clientY,
         }
       });
+
+      // update module input/output positions
+      Object.keys(this.modules).forEach(k => {
+        this.modules[k].updateInputBoxes();
+        this.modules[k].updateOutputBoxes();
+      });
     }
   }
 
@@ -106,7 +133,8 @@ class Scene extends React.Component {
     // check that the click is
     // on an empty part of the scene
     // which happens to be the edges element
-    if (e.target.classList.contains('edges')) {
+    // or the scene if zoomed out
+    if (e.target.classList.contains('edges') || e.target.classList.contains('scene')) {
       this.setState({
         panning: true,
         panStart: {
@@ -118,12 +146,15 @@ class Scene extends React.Component {
   }
 
   render() {
+    const stageStyle = {
+      transform: `scale(${this.state.zoom}) translate(${this.state.offset.x}px, ${this.state.offset.y}px)`
+    }
     return this.props.connectDropTarget(
       <div className={`scene ${this.state.panning ? 'panning': ''}`}
         onMouseDown={this.startPan.bind(this)}
         onMouseUp={() => this.setState({panning: false})}
         onMouseMove={this.pan.bind(this)}>
-        <div className="scene-stage" ref="stage" style={{transform: `scale(${this.state.zoom})`}}>
+        <div className="scene-stage" ref="stage" style={stageStyle}>
           <div className="modules">
             {
               Object.keys(this.props.project.graph.modules).map(modId =>
@@ -137,7 +168,7 @@ class Scene extends React.Component {
                 <stop offset="100%" stopColor="#ff7676"/>
               </linearGradient>
             </defs>
-            <TentativeEdge ref="tentativeEdge" />
+            <TentativeEdge ref="tentativeEdge"/>
             {
               this.props.project.graph.allEdges
                 .filter((edge) => edge.from.id != this.state.draggingModuleId && edge.to.id != this.state.draggingModuleId)
@@ -145,7 +176,7 @@ class Scene extends React.Component {
                   <Edge edge={edge} key={i} scene={this}
                     toModule={this.modules[edge.to.id]}
                     fromModule={this.modules[edge.from.id]}
-                    onClick={this.removeEdge.bind(this, edge)}
+                    onClick={this._removeEdge}
                     ref={this.registerEdge.bind(this, edge.id)}/>
               )
             }
@@ -175,10 +206,13 @@ class Scene extends React.Component {
   updateTentativeEdge(ev) {
     const line = this.refs.tentativeEdge;
     const domNode = ReactDOM.findDOMNode(this);
-    const offset = domNode.getClientRects()[0];
+    var pos = this.truePos({
+      x: ev.clientX,
+      y: ev.clientY
+    }, this.state.zoom)
     line.setState({
-      drawToX: ev.clientX - offset.left,
-      drawToY: ev.clientY - offset.top
+      drawToX: pos.x,
+      drawToY: pos.y
     });
   }
 
@@ -211,7 +245,6 @@ class Scene extends React.Component {
         line.state.outputNum,
         this.props.project.graph.modules[toModuleElem.dataset.moduleId],
         parseInt(input.dataset.inputIndex));
-      this.forceUpdate();
     }
   }
 
@@ -237,12 +270,15 @@ class Scene extends React.Component {
   drawTentativeEdge(fromModule, outputNum, x, y) {
     const line = this.refs.tentativeEdge;
     const domNode = ReactDOM.findDOMNode(this);
-    const offset = domNode.getClientRects()[0];
+    var pos = this.truePos({
+      x: x,
+      y: y
+    }, this.state.zoom)
     line.setState({
       fromModule: fromModule,
       outputNum: outputNum,
-      startX: x - offset.left,
-      startY: y - offset.top,
+      startX: pos.x,
+      startY: pos.y,
       visible: true
     });
     document.addEventListener('mousedown', this._releaseTentativeEdge);
