@@ -41,13 +41,15 @@ class Edge extends React.Component {
       x: this.state.tail.x + xOffset,
       y: this.state.tail.y + yOffset
     };
+    let midpoint = (head.x + tail.x)/2
+    let path = [
+      'M', tail.x, tail.y,
+      'C', midpoint, tail.y, midpoint, head.y, head.x, head.y
+    ].join(' ');
 
     return (
-      <line className="edge"
-        x1={tail.x}
-        y1={tail.y}
-        x2={head.x}
-        y2={head.y}
+      <path className="edge"
+        d={path}
         onClick={() => this.props.onClick(this.props.edge)} />
     );
   }
