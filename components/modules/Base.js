@@ -55,7 +55,16 @@ class BaseModule extends React.Component {
 
   updateInputBoxes() {
     Object.keys(this._inputs).forEach(i => {
-      this.inputBoxes[i] = _.clone(ReactDOM.findDOMNode(this._inputs[i]).getBoundingClientRect());
+      var box = _.clone(ReactDOM.findDOMNode(this._inputs[i]).getBoundingClientRect()),
+          pos = this.props.scene.truePos({
+            x: box.left,
+            y: box.top
+          });
+      // undo transforms
+      this.inputBoxes[i] = {
+        left: pos.x,
+        top: pos.y
+      };
     });
 
     // ensure that incoming edges are pointed to the correct position
@@ -77,7 +86,16 @@ class BaseModule extends React.Component {
 
   updateOutputBoxes() {
     Object.keys(this._outputs).forEach(i => {
-      this.outputBoxes[i] = _.clone(ReactDOM.findDOMNode(this._outputs[i]).getBoundingClientRect());
+      var box = _.clone(ReactDOM.findDOMNode(this._outputs[i]).getBoundingClientRect()),
+          pos = this.props.scene.truePos({
+            x: box.left,
+            y: box.top
+          });
+      // undo transforms
+      this.outputBoxes[i] = {
+        left: pos.x,
+        top: pos.y
+      };
     });
 
     // ensure that outgoing edges are pointed to the correct position

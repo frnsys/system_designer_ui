@@ -24,13 +24,6 @@ const dropTarget = {
         x: left,
         y: top
       }
-    }, function() {
-      // setTimeout(function () {
-      //   window.requestAnimationFrame(function() {
-      //     module.updateInputBoxes();
-      //     module.updateOutputBoxes();
-      //   })
-      // }, 0)
     });
   }
 };
@@ -84,7 +77,7 @@ class Scene extends React.Component {
     zoom = Math.min(maxZoom, zoom);
     zoom = Math.max(minZoom, zoom);
 
-    var before = this.truePos(this.lastCursorPos, this.state.zoom);
+    var before = this.truePos(this.lastCursorPos);
     var after = this.truePos(this.lastCursorPos, zoom);
     var offset = {
       x: this.state.offset.x + -(before.x - after.x),
@@ -94,12 +87,6 @@ class Scene extends React.Component {
     this.setState({
       zoom: zoom,
       offset: offset
-    });
-
-    // update module input/output positions
-    Object.keys(this.modules).forEach(k => {
-      this.modules[k].updateInputBoxes();
-      this.modules[k].updateOutputBoxes();
     });
   }
 
@@ -119,12 +106,6 @@ class Scene extends React.Component {
           x: e.clientX,
           y: e.clientY,
         }
-      });
-
-      // update module input/output positions
-      Object.keys(this.modules).forEach(k => {
-        this.modules[k].updateInputBoxes();
-        this.modules[k].updateOutputBoxes();
       });
     }
   }
@@ -209,7 +190,7 @@ class Scene extends React.Component {
     var pos = this.truePos({
       x: ev.clientX,
       y: ev.clientY
-    }, this.state.zoom)
+    });
     line.setState({
       drawToX: pos.x,
       drawToY: pos.y
@@ -273,7 +254,7 @@ class Scene extends React.Component {
     var pos = this.truePos({
       x: x,
       y: y
-    }, this.state.zoom)
+    });
     line.setState({
       fromModule: fromModule,
       outputNum: outputNum,
@@ -285,6 +266,7 @@ class Scene extends React.Component {
   }
 
   truePos(pos, zoom) {
+    var zoom = zoom || this.state.zoom;
     return {
       x: pos.x/zoom - this.state.offset.x,
       y: pos.y/zoom - this.state.offset.y
